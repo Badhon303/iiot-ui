@@ -30,7 +30,7 @@ export const request = async (method, url, values, config = {}) => {
     const response = await axios.request({
       method,
       url,
-      data: { data: values },
+      data: values,
       ...config,
     })
     return response.data

@@ -15,7 +15,6 @@ export async function GET() {
   cookieStore.delete("accessToken")
   const session = await getSession()
   session.jwt = ""
-  session.user = {}
   session.isLoggedIn = false
   await session.save()
 

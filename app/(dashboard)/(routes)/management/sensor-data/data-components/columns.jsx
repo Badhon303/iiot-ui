@@ -5,7 +5,7 @@ import { ArrowUpDown } from "lucide-react"
 import { Button } from "@/components/ui/button"
 
 import { Checkbox } from "@/components/ui/checkbox"
-import { CellAction } from "./cell-action"
+import { CellAction } from "../../../set-up/sensor-type/type-components/cell-action"
 
 export const columns = [
   {

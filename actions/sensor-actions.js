@@ -5,7 +5,7 @@ const url = process.env.NEXT_PUBLIC_BASE_URL
 
 export async function getSensorTypeData() {
   const session = await getSession()
-  const apiUrl = urlJoin(url, "/api/sensor-types?sort=updatedAt:desc")
+  const apiUrl = urlJoin(url, "/api/v1/get-sensor-tables")
   if (!session) {
     console.error("Session is null or undefined")
     return null
@@ -19,42 +19,7 @@ export async function getSensorTypeData() {
     })
     if (data.ok) {
       const parsedData = await data.json()
-      if (!parsedData) {
-        return null
-      }
-      if (
-        Number(parsedData?.meta?.pagination?.total) > 500 &&
-        Number(parsedData?.meta?.pagination?.total) < 5001
-      ) {
-        const apiUrl = urlJoin(
-          url,
-          `/api/sensor-types?pagination[pageSize]=${parsedData?.meta?.pagination?.total}&pagination[page]=1?sort=updatedAt:desc`
-        )
-        try {
-          const data = await fetch(apiUrl, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.jwt}`,
-            },
-          })
-          if (data.ok) {
-            const parsedData = await data.json()
-            if (!parsedData) {
-              return null
-            }
-            // console.log("total: ", parsedData?.meta?.pagination?.total)
-            return parsedData
-          } else {
-            console.error(
-              "GET /api/sensor-types failed with status",
-              data.status
-            )
-          }
-        } catch (error) {
-          throw new Error("Need to reconsider about page size, its too high.")
-        }
-      }
-      return parsedData
+      return parsedData.data
     } else {
       console.error("GET /api/sensor-types failed with status", data.status)
     }
@@ -64,9 +29,9 @@ export async function getSensorTypeData() {
   }
 }
 
-export async function getSensorData() {
+export async function getSensorDropDownData() {
   const session = await getSession()
-  const apiUrl = urlJoin(url, "/api/sensors?populate=*&sort=updatedAt:desc")
+  const apiUrl = urlJoin(url, "/api/v1/sensor/type/all")
   if (!session) {
     console.error("Session is null or undefined")
     return null
@@ -80,44 +45,44 @@ export async function getSensorData() {
     })
     if (data.ok) {
       const parsedData = await data.json()
-      if (!parsedData) {
-        return null
-      }
-      if (
-        Number(parsedData?.meta?.pagination?.total) > 500 &&
-        Number(parsedData?.meta?.pagination?.total) < 5001
-      ) {
-        const apiUrl = urlJoin(
-          url,
-          `/api/sensors?pagination[pageSize]=${parsedData?.meta?.pagination?.total}&pagination[page]=1?populate=*&sort=updatedAt:desc`
-        )
-        try {
-          const data = await fetch(apiUrl, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${session.jwt}`,
-            },
-          })
-          if (data.ok) {
-            const parsedData = await data.json()
-            if (!parsedData) {
-              return null
-            }
-            // console.log("total: ", parsedData?.meta?.pagination?.total)
-            return parsedData
-          } else {
-            console.error("GET /api/sensors failed with status", data.status)
-          }
-        } catch (error) {
-          throw new Error("Need to reconsider about page size, its too high.")
-        }
-      }
-      return parsedData
+      return parsedData.data
     } else {
-      console.error("GET /api/sensors failed with status", data.status)
+      console.error(
+        "GET /api/sensor-dropdown-data failed with status",
+        data.status
+      )
     }
   } catch (error) {
     // console.error("GET /api/product-types ", error)
-    throw new Error(`GET /api/sensor-types ${error}`)
+    throw new Error(`GET /api/sensor-dropdown-data ${error}`)
   }
 }
+
+// export async function getSensorDataById(id) {
+//   const session = await getSession()
+//   const apiUrl = urlJoin(url, `/api/v1/get-record/${id}`)
+//   if (!session) {
+//     console.error("Session is null or undefined")
+//     return null
+//   }
+//   try {
+//     const data = await fetch(apiUrl
+//       , {
+//       headers: {
+//         "Content-Type": "application/json",
+//         // "Access-Control-Allow-Origin": "*",
+//         Authorization: `Bearer ${session.jwt}`,
+//       },
+//     }
+//   )
+//     if (data.ok) {
+//       const parsedData = await data.json()
+//       return parsedData.data
+//     } else {
+//       console.error("GET /api/sensor-data failed with status", data.status)
+//     }
+//   } catch (error) {
+//     // console.error("GET /api/product-types ", error)
+//     throw new Error(`GET /api/sensor-data ${error}`)
+//   }
+// }

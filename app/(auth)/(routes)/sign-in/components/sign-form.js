@@ -52,7 +52,7 @@ const SignInForm = () => {
       })
       const data = await response.json()
       if (data.error) {
-        throw new Error(data.error?.message)
+        throw new Error(data.error)
       } else {
         router.push("/dashboard")
       }

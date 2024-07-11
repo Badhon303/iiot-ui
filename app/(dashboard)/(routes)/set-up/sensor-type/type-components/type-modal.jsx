@@ -6,8 +6,8 @@ import * as z from "zod"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
 import { useToast } from "@/components/ui/use-toast"
-import { useRouter } from "next/navigation"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
 
 import { Modal } from "@/components/ui/modal"
 import { Input } from "@/components/ui/input"
@@ -21,34 +21,58 @@ import {
 } from "@/components/ui/form"
 import { Button } from "@/components/ui/button"
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+
 import { FaRegTrashCan } from "react-icons/fa6"
 import { MdAdd } from "react-icons/md"
+import { FaAngleDown } from "react-icons/fa"
 
 const formSchema = z.object({
-  sensorName: z.string().min(1).max(100),
+  sensorType: z.string().min(1).max(100),
+  hardwareId: z.string().min(1).max(100),
+  hardwareNickname: z.string().min(1).max(100),
+  targetTableName: z.string().min(1).max(100),
 })
 
 export const TypeModal = ({ isOpen, onClose, id }) => {
   const { toast } = useToast()
-  const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const router = useRouter()
 
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      sensorName: "",
+      sensorType: "",
+      hardwareId: "",
+      hardwareNickname: "",
+      targetTableName: "",
       sensorInput: {},
     },
   })
 
-  const [inputs, setInputs] = useState([{ inputName: "", inputValue: "" }])
+  const [inputs, setInputs] = useState([{ inputName: "", inputValue: "TEXT" }])
 
   const handleAddInput = () => {
-    setInputs([...inputs, { inputName: "", inputValue: "" }])
+    setInputs([...inputs, { inputName: "", inputValue: "TEXT" }])
   }
 
   const handleChange = (event, index) => {
-    let { name, value } = event.target
+    let { name, value } = event.target || {}
+    // Handle case where event might not have target or target properties
+    if (!name) {
+      name = "inputValue"
+    }
+    if (!value) {
+      value = event // in case the value is directly passed as in DropdownMenuRadioGroup
+    }
     let onChangeValue = [...inputs]
     onChangeValue[index][name] = value
     setInputs(onChangeValue)
@@ -68,8 +92,11 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
     })
 
     return {
-      sensorName: obj.sensorName,
-      sensorInput: newSensorInput,
+      sensor_type: obj.sensorType,
+      hardware_id: obj.hardwareId,
+      hardware_nickname: obj.hardwareNickname,
+      target_table_name: obj.targetTableName,
+      columns: newSensorInput,
     }
   }
 
@@ -105,7 +132,7 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
       if (id) {
         await request("PUT", `/api/sensor-types/${id}`, transformedObj)
       } else {
-        await request("POST", "/api/sensor-types", transformedObj)
+        await request("POST", "/api/v1/sensor/type/create", transformedObj)
       }
       router.refresh()
       toast({
@@ -138,14 +165,65 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <FormField
                   control={form.control}
-                  name="sensorName"
+                  name="sensorType"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Sensor Name</FormLabel>
+                      <FormLabel>Sensor Type</FormLabel>
                       <FormControl>
                         <Input
                           disabled={loading}
-                          placeholder="Sensor Name"
+                          placeholder="Sensor Type"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hardwareId"
+                  render={({ field }) => (
+                    <FormItem className="mt-2">
+                      <FormLabel>Hardware Id</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Hardware Id"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="hardwareNickname"
+                  render={({ field }) => (
+                    <FormItem className="mt-2">
+                      <FormLabel>Hardware Nickname</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Hardware Nickname"
+                          {...field}
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="targetTableName"
+                  render={({ field }) => (
+                    <FormItem className="mt-2">
+                      <FormLabel>Target Table Name</FormLabel>
+                      <FormControl>
+                        <Input
+                          disabled={loading}
+                          placeholder="Target Table Name"
                           {...field}
                         />
                       </FormControl>
@@ -164,13 +242,45 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
                           value={item.inputName}
                           onChange={(event) => handleChange(event, index)}
                         />
-                        <Input
-                          name="inputValue"
-                          type="text"
-                          placeholder="Input Value"
-                          value={item.inputValue}
-                          onChange={(event) => handleChange(event, index)}
-                        />
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline">
+                              {item.inputValue === "TEXT"
+                                ? "TEXT"
+                                : item.inputValue === "DOUBLE(10,2)"
+                                ? "DECIMAL"
+                                : item.inputValue === "VARCHAR(255)"
+                                ? "ALPHANUMERIC"
+                                : ""}
+                              <span className="ps-2">
+                                <FaAngleDown />
+                              </span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent className="w-56">
+                            <DropdownMenuLabel>Type</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup
+                              value={item.inputValue}
+                              onValueChange={(value) =>
+                                handleChange(
+                                  { target: { name: "inputValue", value } },
+                                  index
+                                )
+                              }
+                            >
+                              <DropdownMenuRadioItem value="VARCHAR(255)">
+                                ALPHANUMERIC
+                              </DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="DOUBLE(10,2)">
+                                DECIMAL
+                              </DropdownMenuRadioItem>
+                              <DropdownMenuRadioItem value="TEXT">
+                                TEXT
+                              </DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                         {inputs.length > 1 && (
                           <Button onClick={() => handleDeleteInput(index)}>
                             <FaRegTrashCan />
