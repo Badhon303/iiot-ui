@@ -132,14 +132,7 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
       if (id) {
         await request("PUT", `/api/sensor-types/${id}`, transformedObj)
       } else {
-        // await request("POST", "/api/v1/sensor/type/create", transformedObj)
-        await fetch("http://15.207.41.236:3001/api/v1/sensor/type/create", {
-          method: "POST", // or 'PUT'
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(transformedObj), // The data to send in the request body
-        })
+        await request("POST", "/api/v1/sensor/type/create", transformedObj)
       }
       router.refresh()
       toast({

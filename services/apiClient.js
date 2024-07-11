@@ -35,6 +35,7 @@ export const request = async (method, url, values, config = {}) => {
     })
     return response.data
   } catch (error) {
+    console.log("axios error: ", error)
     throw error.response
       ? new Error(`${error.response.status} ${error.response.statusText}`)
       : new Error("Network error")
