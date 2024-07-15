@@ -136,8 +136,8 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
       }
       router.refresh()
       toast({
-        title: `Product Type ${id ? "Updated" : "Created"} successfully`,
-        description: "Time date will be updated",
+        title: `Sensor Type ${id ? "Updated" : "Created"} successfully`,
+        // description: "Time date will be updated",
       })
     } catch (error) {
       toast({
@@ -239,7 +239,11 @@ export const TypeModal = ({ isOpen, onClose, id }) => {
                           name="inputName"
                           type="text"
                           placeholder="Input Name"
-                          value={item.inputName}
+                          value={
+                            typeof item.inputName === "string"
+                              ? item.inputName
+                              : ""
+                          }
                           onChange={(event) => handleChange(event, index)}
                         />
                         <DropdownMenu>
